@@ -1,4 +1,4 @@
-import CodegenLib/java
+import CodeGenLib/java
 
 java.globalNamespace = "com.foc.codegen.example"
 
