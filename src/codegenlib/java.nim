@@ -1,3 +1,5 @@
+import std/tables
+
 var globalNamespace* = "example"  # Can be overridden by the user
 
 import java/[keywords, types, class, fileconstruction]
@@ -28,6 +30,10 @@ proc newJavaMethodDeclaration*(name:string, returnTyp:string="void",
   result.jpublic = public
   result.jstatik = statik
   result.jfinal = final
+
+
+proc addMethodArgument*(jmethod:var JavaMethodDeclaration, typ:string, name:string) =
+  jmethod.jarguments[name] = typ
 
 
 proc addSnippetToMethodBody*(jmethod:var JavaMethodDeclaration, body:varargs[JavaBaseType]) =

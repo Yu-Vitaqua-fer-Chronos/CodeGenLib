@@ -16,6 +16,8 @@ javaclass.extends("Object")
 javaclass.addClassVariable(javavardecl)
 javaclass.addClassVariable(javacode "    public static final String emittedVar = \"DON'T DO MANUAL CODE EMISSION UNLESS NEEDED!\";\n")
 
+javamethod.addMethodArgument "String", "example"
+
 javamethod.addSnippetToMethodBody "System.out.println(CodeGen.myVar);\n".javacode
 javamethod.addSnippetToMethodBody "System.out.println(CodeGen.emittedVar);\n".javacode
 javamethod.addSnippetToMethodBody "System.out.println(\"AUTOMATED JAVA CODE WRAPPING *WILL* BE DONE AT SOME POINT\");\n".javacode

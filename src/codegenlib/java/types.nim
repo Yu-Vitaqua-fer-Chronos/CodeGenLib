@@ -18,7 +18,7 @@ type
   JavaMethodDeclaration* = ref object of JavaBaseType
     jreturnTyp*: string                # The return type of the method
     jname*: string                     # The name of the method
-    jarguments*: Table[string, string] # The name-type table
+    jarguments*: OrderedTable[string, string] # The name-type table
     jpublic*: bool                     # Allows you to declare a public variable
     jstatik*: bool                     # Have to use a stupid name, but declares a field as static
     jfinal*: bool                      # Declares the variable as final, making it unchangeable
