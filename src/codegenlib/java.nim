@@ -30,4 +30,9 @@ proc newJavaMethodDeclaration*(name:string, returnTyp:string="void",
   result.jfinal = final
 
 
+proc addSnippetToMethodBody*(jmethod:var JavaMethodDeclaration, body:varargs[JavaBaseType]) =
+  for item in body:
+    jmethod.jbody.add item
+
+
 proc javacode*(code:string):JavaCodeEmission = JavaCodeEmission(jcode:code)

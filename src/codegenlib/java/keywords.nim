@@ -10,8 +10,10 @@ else:
 const
   LINE_SEP* = ";" & NEWLINE
   DOT* = "."
-  OPEN_BRKT* = "{" & NEWLINE
-  CLOSE_BRKT* = NEWLINE & "}"
+  OPEN_BRKT* = "{"
+  CLOSE_BRKT* = "}"
+  OPEN_PAREN* = "("
+  CLOSE_PAREN* = ")"
   PUBLIC* = "public "
   PRIVATE* = "private "
   STATIC* = "static "

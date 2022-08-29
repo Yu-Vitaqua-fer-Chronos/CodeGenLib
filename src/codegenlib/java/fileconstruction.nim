@@ -1,6 +1,14 @@
+import std/strutils
+
 import ../java
 import ./keywords
 import ./types
+
+
+when defined(minimised):
+  const NINDENT = ""
+else:
+  template NINDENT():string = (repeat(INDENT, blocksWithin))
 
 
 proc newJavaFile*(subpackage: string = "", namespace: string = ""): JavaFile =
@@ -25,91 +33,141 @@ proc imports*(jf: var JavaFile, importStmts: varargs[string]) =
     jf.jimportStatements.add importStmt
 
 
+proc classVarConstruction(jobj:JavaBaseType, blocksWithin:var int):string =
+  var constructed = ""
+
+  if jobj of JavaCodeEmission:
+    constructed &= jobj.JavaCodeEmission.jcode
+
+  elif jobj of JavaVariableDeclaration:
+    let classvar = JavaVariableDeclaration jobj
+    constructed &= NINDENT
+
+    if classvar.jpublic:
+      constructed &= PUBLIC
+    else:
+      constructed &= PRIVATE
+
+    if classvar.jstatik:
+      constructed &= STATIC
+
+    if classvar.jfinal:
+      constructed &= FINAL
+
+    constructed &= classvar.jtyp & SPACE & classvar.jname
+
+    if classvar.jstatik and classvar.jvalue == "":
+      echo "WARNING: The class `" & JavaClass(classvar.jparent).jname & "` is static but with no value! This will error in javac!"
+
+    if classvar.jvalue != "":
+      constructed &= EQUALS & classvar.jvalue
+
+    constructed &= LINE_SEP
+
+  return constructed
+
+
+proc methodConstruction(jobj:JavaBaseType, blocksWithin:var int): string =
+  if jobj of JavaCodeEmission:
+    result &= jobj.JavaCodeEmission.jcode
+  elif jobj of JavaMethodDeclaration:
+    let jmthd = JavaMethodDeclaration jobj
+
+    result &= NEWLINE & NINDENT
+
+    if jmthd.jpublic:
+      result &= PUBLIC
+    else:
+      result &= PRIVATE
+
+    if jmthd.jstatik:
+      result &= STATIC
+
+    if jmthd.jfinal:
+      result &= FINAL
+
+    result &= jmthd.jreturnTyp & SPACE
+
+    result &= jmthd.jname & OPEN_PAREN
+
+
+
+    result &= CLOSE_PAREN
+
+    blocksWithin += 1
+    result &= SPACE & OPEN_BRKT & NEWLINE
+
+    for item in jmthd.jbody:
+      result &= item.JavaCodeEmission.jcode
+
+    blocksWithin -= 1
+    result &= NEWLINE & NINDENT & CLOSE_BRKT
+
+
+proc classConstruction(jobj:JavaBaseType, blocksWithin:var int):string =
+  if jobj of JavaCodeEmission:
+    result &= jobj.JavaCodeEmission.jcode
+
+  elif jobj of JavaClass:
+    let cls = JavaClass jobj
+    if cls.jpublic:
+      result &= PUBLIC
+    else:
+      result &= PRIVATE
+
+    if cls.jfinal:
+      result &= FINAL
+
+    result &= CLASS_DECL & cls.jname & SPACE
+
+
+    if cls.jextends != "":
+      result &= EXTENDS_KW & cls.jextends & SPACE
+
+
+    if cls.jimplements.len != 0:
+      result &= IMPLEMENTS_KW & cls.jimplements[0]
+      cls.jimplements.del(0)
+
+      if cls.jimplements.len != 0:
+        for implement in cls.jimplements:
+          result &= COMMA & implement
+      result &= SPACE
+
+
+    result &= NINDENT & OPEN_BRKT & NEWLINE
+    blocksWithin += 1
+
+    for classvar in cls.jclassvars:
+      result &= classvar.classVarConstruction(blocksWithin)
+
+    for jmethod in cls.jclassmethods:
+      result &= jmethod.methodConstruction(blocksWithin)
+
+    result &= NINDENT & NEWLINE & CLOSE_BRKT
+    blocksWithin -= 1
+
+
 proc `$`*(jf: JavaFile): string =
   # Will be used to keep track of brackets, should always
   # be 0 at the end, if not, something went wrong!
   var blocksWithin = 0
 
-  var constructed = PKG_STMT & jf.jnamespace
+  result &= PKG_STMT & jf.jnamespace
 
   if jf.jsubpackage != "":
-    constructed &= DOT & jf.jsubpackage
+    result &= DOT & jf.jsubpackage
 
-  constructed &= LINE_SEP & NEWLINE
+  result &= LINE_SEP & NEWLINE
 
 
   for imprt in jf.jimportStatements:
-    constructed &= IMPORT_STMT & imprt & LINE_SEP
-  constructed &= NEWLINE
+    result &= IMPORT_STMT & imprt & LINE_SEP
+  result &= NEWLINE
 
 
   for clss in jf.jclasses:
-    if clss of JavaCodeEmission:
-      constructed &= clss.JavaCodeEmission.jcode
-
-    elif clss of JavaClass:
-      let cls = JavaClass clss
-      if cls.jpublic:
-        constructed &= PUBLIC
-      else:
-        constructed &= PRIVATE
-
-      if cls.jfinal:
-        constructed &= FINAL
-
-      constructed &= CLASS_DECL & cls.jname & SPACE
-
-
-      if cls.jextends != "":
-        constructed &= EXTENDS_KW & cls.jextends & SPACE
-
-
-      if cls.jimplements.len != 0:
-        constructed &= IMPLEMENTS_KW & cls.jimplements[0]
-        cls.jimplements.del(0)
-
-        if cls.jimplements.len != 0:
-          for implement in cls.jimplements:
-            constructed &= COMMA & implement
-        constructed &= SPACE
-
-
-      constructed &= OPEN_BRKT
-      blocksWithin += 1
-
-
-      for classvarr in cls.jclassvars:
-        if classvarr of JavaVariableDeclaration:
-          let classvar = JavaVariableDeclaration classvarr
-          constructed &= INDENT
-
-          if classvar.jpublic:
-            constructed &= PUBLIC
-          else:
-            constructed &= PRIVATE
-
-          if classvar.jstatik:
-            constructed &= STATIC
-
-          if classvar.jfinal:
-            constructed &= FINAL
-
-          constructed &= classvar.jtyp & SPACE & classvar.jname
-
-          if classvar.jstatik and classvar.jvalue == "":
-            echo "WARNING: The class `" & cls.jname & "` is static but with no value! This will error in javac!"
-
-          if classvar.jvalue != "":
-            constructed &= EQUALS & classvar.jvalue
-
-          constructed &= LINE_SEP
-
-        if classvarr of JavaCodeEmission:
-          constructed &= classvarr.JavaCodeEmission.jcode
-
-      constructed &= CLOSE_BRKT
-      blocksWithin -= 1
-
+    result &= clss.classConstruction(blocksWithin)
 
   if blocksWithin != 0:
     echo "WARNING: The `blocksWithin` variable used internally to keep track of brackets, is not 0!"
@@ -117,6 +175,3 @@ proc `$`*(jf: JavaFile): string =
       echo "The faulty package is: " & jf.jnamespace & "." & jf.jsubpackage
     else:
       echo "The faulty package is: " & jf.jnamespace
-
-
-  return constructed
