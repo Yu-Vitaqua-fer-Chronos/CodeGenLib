@@ -90,8 +90,13 @@ proc methodConstruction(jobj:JavaBaseType, blocksWithin:var int): string =
 
     result &= jmthd.jname & OPEN_PAREN
 
+    var firstarg = true
     for name, typ in jmthd.jarguments.pairs:
-      result &= typ & SPACE & name # & COMMA
+      if firstarg:
+        result &= typ & SPACE & name
+        firstarg = false
+      else:
+        result &= COMMA & typ & SPACE & name
 
     result &= CLOSE_PAREN
 
