@@ -6,6 +6,7 @@ var
   javafile:JavaFile = newJavaFile("example")
   javaclass:JavaClass = newJavaClass("CodeGen")
   javavardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "myVar", "\"Wow\"", true, true, true)
+  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "\"This is just a placeholder!\"")
   javamethod:JavaMethodDeclaration = newJavaMethodDeclaration("main", "void", true, true)
 
 # Don't strictly *need* to import a class, but lets you do `Object`
@@ -18,9 +19,12 @@ javaclass.addClassVariable(javacode "    public static final String emittedVar =
 
 javamethod.addMethodArgument "String", "example"
 
-javamethod.addSnippetToMethodBody "System.out.println(CodeGen.myVar);\n".javacode
+javamethod.addSnippetToMethodBody newvardecl
+
+javamethod.addSnippetToMethodBody "\nSystem.out.println(CodeGen.myVar);\n".javacode
 javamethod.addSnippetToMethodBody "System.out.println(CodeGen.emittedVar);\n".javacode
 javamethod.addSnippetToMethodBody "System.out.println(\"AUTOMATED JAVA CODE WRAPPING *WILL* BE DONE AT SOME POINT\");\n".javacode
+javamethod.addSnippetToMethodBody "System.out.println(methodVar);\n".javacode
 
 javaclass.addClassMethod(javamethod)
 

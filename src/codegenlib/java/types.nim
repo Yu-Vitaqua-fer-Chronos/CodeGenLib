@@ -38,3 +38,7 @@ type
     jsubpackage*: string            # Allows a subpackage to be added, such as "example"
     jclasses*: seq[JavaBaseType]       # Classes stored as a sequence to be built
     jimportStatements*: seq[string] # Just collects all package imports
+
+
+type
+  UnconstructableTypeDefect* = object of Defect
