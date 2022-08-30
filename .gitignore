@@ -9,4 +9,7 @@ htmldocs/
 # End of https://www.toptal.com/developers/gitignore/api/nim
 
 ### Other misc files ###
+scripts/autotagger
+.cache/*
+
 tests/javatest
