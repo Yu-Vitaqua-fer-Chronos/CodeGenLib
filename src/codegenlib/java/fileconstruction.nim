@@ -10,7 +10,7 @@ else:
   template NINDENT():string = (repeat(INDENT, blocksWithin))
 
 
-proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string
+proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string  # Forward declaration
 
 
 proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
@@ -20,10 +20,11 @@ proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
 proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
   result &= NINDENT
 
-  if variable.jpublic:
-    result &= PUBLIC
-  else:
-    result &= PRIVATE
+  if not (variable.jparent of JavaMethodDeclaration):
+    if variable.jpublic:
+      result &= PUBLIC
+    else:
+      result &= PRIVATE
 
   if variable.jstatik:
     result &= STATIC
@@ -134,10 +135,7 @@ proc construct(jf:JavaFile, blocksWithin:var int):string =
 
 
   for clss in jf.jclasses:
-    if clss of JavaClass:
-      result &= JavaClass(clss).construct(blocksWithin)
-    elif clss of JavaCodeEmission:
-      result &= JavaCodeEmission(clss).construct(blocksWithin)
+    result &= clss.constructionHelper(blocksWithin)
 
   if blocksWithin != 0:
     echo "WARNING: The `blocksWithin` variable used internally to keep track of brackets, is not 0!"
@@ -164,7 +162,7 @@ proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string =
     result &= JavaCodeEmission(jobj).construct(blocksWithin)
 
   else:
-    raise newException(UnconstructableTypeDefect, "We can't build a generic object! It needs a type!")
+    raise newException(UnconstructableTypeDefect, "We can't build this object! Has the construction method been implemented in `fileconstruction.constructionHelper`?")
 
 proc `$`*(javafile: JavaFile): string =
   # Will be used to keep track of brackets, should always
