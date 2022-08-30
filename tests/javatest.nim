@@ -6,7 +6,7 @@ var
   javafile:JavaFile = newJavaFile("example")
   javaclass:JavaClass = newJavaClass("CodeGen")
   javavardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "myVar", "\"Wow\"", true, true, true)
-  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "\"This is just a placeholder!\"")
+  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "\"This is just a placeholder!\"", true)
   javamethod:JavaMethodDeclaration = newJavaMethodDeclaration("main", "void", true, true)
 
 # Don't strictly *need* to import a class, but lets you do `Object`

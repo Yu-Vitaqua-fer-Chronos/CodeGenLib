@@ -26,8 +26,8 @@ proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
     else:
       result &= PRIVATE
 
-  if variable.jstatik:
-    result &= STATIC
+    if variable.jstatik:
+      result &= STATIC
 
   if variable.jfinal:
     result &= FINAL

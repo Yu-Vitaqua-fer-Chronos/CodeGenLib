@@ -30,9 +30,9 @@ proc imports*(jf: var JavaFile, importStmts: varargs[string]) =
     jf.jimportStatements.add importStmt
 
 
-proc newJavaVariableDeclaration*(typ: string, name: string, value:string="", public: bool = false,
-    statik: bool = false,
-    final: bool = false): JavaVariableDeclaration =
+proc newJavaVariableDeclaration*(typ: string, name: string, value:string="", final: bool = false,
+    public: bool = false,
+    statik: bool = false): JavaVariableDeclaration =
   result = JavaVariableDeclaration()
 
   result.jtyp = typ

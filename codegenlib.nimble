@@ -1,6 +1,6 @@
 # Package
 
-version       = "1.0.1"
+version       = "1.0.2"
 author        = "Mythical Forest Collective"
 description   = "A simple code generation library for other programming languages!"
 license       = "MIT"
