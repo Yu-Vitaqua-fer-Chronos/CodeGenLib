@@ -8,7 +8,7 @@ import osproc
 
 const GIT_URL = "github.com"
 const USERNAME = "Mythical-Forest-Collective"
-const PROJECT = "nim-commit-test"
+const PROJECT = "CodeGenLib"
 
 const REPO = GIT_URL & "/" & USERNAME & "/" & PROJECT & ".git"
 
