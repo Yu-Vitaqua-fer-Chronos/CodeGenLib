@@ -1,8 +1,8 @@
-import std/tables
+import std/[tables, strutils, sequtils]
 
 var globalNamespace* = "example"  # Can be overridden by the user
 
-import java/[keywords, types, class, fileconstruction]
+import java/[keywords, types, class, fileconstruction, miscutils]
 export java.keywords, java.types, java.class, java.fileconstruction
 
 
@@ -67,3 +67,40 @@ proc addSnippetToMethodBody*(jmethod:var JavaMethodDeclaration, body:varargs[Jav
 
 
 proc javacode*(code:string):JavaCodeEmission = JavaCodeEmission(jcode:code)
+
+
+proc newJavaMethodWrapper*(jcw:JavaClassWrapper, name:string,
+  arguments:seq[OrderedTable[string, string]]=newSeq[OrderedTable[string, string]](0)): JavaMethodWrapper =
+  result = JavaMethodWrapper()
+
+  jcw.jmethods.add result  # Register the method automatically
+
+  result.jparent = jcw
+  result.jname = name
+  result.jarguments = arguments
+
+
+proc newJavaClassWrapper*(parent:JavaBaseType, name:string): JavaClassWrapper =
+  result = JavaClassWrapper()
+
+  result.jname = name
+  result.jparent = parent
+
+  if parent of JavaClassWrapper:
+    JavaClassWrapper(parent).jclasses.add result
+
+proc newJavaClassWrapper*(name:string): JavaClassWrapper =
+  result = JavaClassWrapper()
+
+  result.jname = name
+
+
+proc call*(jmw:JavaMethodWrapper, args:varargs[string]):JavaCodeEmission =
+  var quotedArgs:seq[string] = @[]
+
+  for i in args:
+    qot
+
+  var jc = jmw.jname & OPEN_PAREN & args.join(COMMA) & CLOSE_PAREN
+
+  return jc.javacode

@@ -7,6 +7,16 @@ type
   JavaCodeEmission* = ref object of JavaBaseType
     jcode*:string # The raw Java code as a string, could be anything as long as it's valid
 
+  JavaWrapperObject* = ref object of JavaBaseType
+    jname*:string # The name of the Java object we're referencing
+
+  JavaMethodWrapper* = ref object of JavaWrapperObject
+    jarguments*:seq[OrderedTable[string, string]] # The arguments of the Java method, as a sequence of tables
+
+  JavaClassWrapper* = ref object of JavaWrapperObject
+    jmethods*:seq[JavaMethodWrapper] # Methods that a class owns
+    jclasses*:seq[JavaClassWrapper]  # For nested classes (that are public)
+
   JavaVariableDeclaration* = ref object of JavaBaseType
     jtyp*: string         # The type of the variable
     jname*: string        # The name of the variable
