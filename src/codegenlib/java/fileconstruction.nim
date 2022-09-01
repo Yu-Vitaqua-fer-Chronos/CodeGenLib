@@ -145,6 +145,28 @@ proc construct(jf:JavaFile, blocksWithin:var int):string =
       echo "The faulty package is: " & jf.jnamespace
 
 
+proc construct(jb:JavaBlock, blocksWithin:var int):string =
+  result &= NEWLINE & NINDENT
+
+  for i in 0..min(jb.jnames.high, jb.jsnippets.high):
+    if i != 0:
+      result &= PSPACE
+
+    blocksWithin += 1
+    result &= jb.jnames[i] & PSPACE & OPEN_BRKT
+
+    for snippet in jb.jsnippets[i]:
+      result &= NEWLINE & NINDENT & snippet.constructionHelper(blocksWithin)
+
+    blocksWithin -= 1
+    result &= NEWLINE & NINDENT & CLOSE_BRKT
+
+    if i != 0:
+      result &= PSPACE
+
+  result &= NEWLINE
+
+
 proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string =
   if jobj of JavaFile:
     result &= JavaFile(jobj).construct(blocksWithin)
@@ -157,6 +179,9 @@ proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string =
 
   elif jobj of JavaMethodDeclaration:
     result &= JavaMethodDeclaration(jobj).construct(blocksWithin)
+
+  elif jobj of JavaBlock:
+    result &= JavaBlock(jobj).construct(blocksWithin)
 
   elif jobj of JavaCodeEmission:
     result &= JavaCodeEmission(jobj).construct(blocksWithin)

@@ -2,10 +2,12 @@ when defined(minimised): # Purely here for generating readable output
   const
     NEWLINE* = ""
     INDENT* = ""
+    PSPACE* = ""
 else:
   const
     NEWLINE* = "\n"
     INDENT* = "    "
+    PSPACE* = " "
 
 const
   LINE_SEP* = ";" & NEWLINE

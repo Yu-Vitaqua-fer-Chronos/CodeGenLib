@@ -34,6 +34,10 @@ type
     jfinal*: bool                      # Declares the variable as final, making it unchangeable
     jbody*: seq[JavaBaseType]          # Allows for us to give different object types (such as variable declaration)
 
+  JavaBlock* = ref object of JavaBaseType # Used for representing if statements, for example
+    jnames*: seq[string]               # Name of the blocks
+    jsnippets*: seq[seq[JavaBaseType]] # The block of code that should be generated for each name
+
   JavaClass* = ref object of JavaBaseType # Allows empty initialisation
     jname*: string            # The package name for the outputted Java file
     jpublic*: bool            # This just defines the classes visibility, by default this is true

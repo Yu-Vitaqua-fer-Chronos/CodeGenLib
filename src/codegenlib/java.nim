@@ -1,4 +1,4 @@
-import std/[tables]
+import std/[tables, sequtils]
 
 var globalNamespace* = "example"  # Can be overridden by the user
 
@@ -17,12 +17,6 @@ proc newJavaFile*(subpackage: string = "", namespace: string = ""): JavaFile =
     result.jnamespace = namespace
 
   result.jsubpackage = subpackage
-
-
-proc addJavaClass*(jf: var JavaFile, clsses: varargs[JavaClass]) =
-  for cls in clsses:
-    cls.jparent = jf
-    jf.jclasses.add cls
 
 
 proc imports*(jf: var JavaFile, importStmts: varargs[string]) =
@@ -56,6 +50,10 @@ proc newJavaMethodDeclaration*(name:string, returnTyp:string="void",
   result.jfinal = final
 
 
+proc newJavaBlock*(): JavaBlock =  # Empty
+  return JavaBlock()
+
+
 proc addMethodArgument*(jmethod:var JavaMethodDeclaration, typ:string, name:string) =
   jmethod.jarguments[name] = typ
 
@@ -64,6 +62,15 @@ proc addSnippetToMethodBody*(jmethod:var JavaMethodDeclaration, body:varargs[Jav
   for item in body:
     item.jparent = jmethod
     jmethod.jbody.add item
+
+
+proc addSnippetToBlock*(jb: var JavaBlock, name:string, snippets:openArray[JavaBaseType]) =
+  jb.jnames.add name
+  jb.jsnippets.add toSeq(snippets)
+
+proc addSnippetToBlock*(jb: var JavaBlock, name:string, snippets:varargs[JavaBaseType]) =
+  jb.jnames.add name
+  jb.jsnippets.add toSeq(snippets)
 
 
 proc javacode*(code:string):JavaCodeEmission = JavaCodeEmission(jcode:code)
