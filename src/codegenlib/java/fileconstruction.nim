@@ -20,7 +20,7 @@ proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
 proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
   result &= NINDENT
 
-  if not (variable.jparent of JavaMethodDeclaration) or not (variable.jparent of JavaBlock):
+  if not (variable.jparent of JavaMethodDeclaration) and not (variable.jparent of JavaBlock):
     if variable.jpublic:
       result &= PUBLIC
     else:
