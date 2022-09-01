@@ -32,7 +32,10 @@ proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
   if variable.jfinal:
     result &= FINAL
 
-  result &= variable.jtyp & SPACE & variable.jname
+  if variable.jtyp != "":
+    result &= variable.jtyp & SPACE
+
+  result &= variable.jname
 
   if variable.jstatik and variable.jvalue == "":
     echo "WARNING: The class `" & JavaClass(variable.jparent).jname & "` is static but with no value! This will error in javac!"
