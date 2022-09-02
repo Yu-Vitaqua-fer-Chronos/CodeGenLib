@@ -14,7 +14,7 @@ proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string  # Forwa
 
 
 proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
-  result &= jcemission.jcode
+  result &= jcemission.jcode & NEWLINE
 
 
 proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
