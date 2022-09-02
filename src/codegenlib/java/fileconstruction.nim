@@ -164,10 +164,10 @@ proc construct(jb:JavaBlock, blocksWithin:var int):string =
       result &= PSPACE
 
     blocksWithin += 1
-    result &= jb.jnames[i] & PSPACE & OPEN_BRKT
+    result &= jb.jnames[i] & PSPACE & OPEN_BRKT & NEWLINE
 
     for snippet in jb.jsnippets[i]:
-      result &= NEWLINE & snippet.constructionHelper(blocksWithin)
+      result &= snippet.constructionHelper(blocksWithin)
 
     blocksWithin -= 1
     result &= NEWLINE & NINDENT & CLOSE_BRKT
