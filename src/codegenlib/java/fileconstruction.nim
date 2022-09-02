@@ -20,7 +20,13 @@ proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
 proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
   result &= NINDENT
 
-  if not (variable.jparent of JavaMethodDeclaration) and not (variable.jparent of JavaBlock):
+  if variable.jparent of JavaMethodDeclaration:
+    discard
+
+  elif variable.jparent of JavaBlock:
+    discard
+
+  else:
     if variable.jpublic:
       result &= PUBLIC
     else:
@@ -28,6 +34,7 @@ proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
 
     if variable.jstatik:
       result &= STATIC
+
 
   if variable.jfinal:
     result &= FINAL

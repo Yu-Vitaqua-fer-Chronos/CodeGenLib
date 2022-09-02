@@ -64,12 +64,21 @@ proc addSnippetToMethodBody*(jmethod:var JavaMethodDeclaration, body:varargs[Jav
     jmethod.jbody.add item
 
 
+proc setjparent(jb:JavaBlock):proc =
+  return proc(snippet:JavaBaseType) =
+    snippet.jparent = jb
+
+
 proc addSnippetToBlock*(jb: var JavaBlock, name:string, snippets:openArray[JavaBaseType]) =
   jb.jnames.add name
+
+  snippets.apply setjparent(jb)
   jb.jsnippets.add toSeq(snippets)
 
 proc addSnippetToBlock*(jb: var JavaBlock, name:string, snippets:varargs[JavaBaseType]) =
   jb.jnames.add name
+
+  toSeq(snippets).apply setjparent(jb)
   jb.jsnippets.add toSeq(snippets)
 
 
