@@ -166,7 +166,10 @@ proc construct(jb:JavaBlock, blocksWithin:var int):string =
     result &= jb.jnames[i] & PSPACE & OPEN_BRKT
 
     for snippet in jb.jsnippets[i]:
-      result &= NEWLINE & NINDENT & snippet.constructionHelper(blocksWithin)
+      if snippet of JavaCodeEmission:
+        result &= NEWLINE & NINDENT & snippet.constructionHelper(blocksWithin)
+      else:
+        result &= NEWLINE & snippet.constructionHelper(blocksWithin)
 
     blocksWithin -= 1
     result &= NEWLINE & NINDENT & CLOSE_BRKT
