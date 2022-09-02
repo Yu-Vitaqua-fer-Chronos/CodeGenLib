@@ -14,7 +14,7 @@ proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string  # Forwa
 
 
 proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
-  result &= jcemission.jcode & NEWLINE
+  result &= NINDENT & jcemission.jcode & NEWLINE # Won't work well for *all* code but, would be nice for prettifying
 
 
 proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
