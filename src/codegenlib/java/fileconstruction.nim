@@ -82,7 +82,7 @@ proc construct(jmthd:JavaMethodDeclaration, blocksWithin:var int): string =
   result &= CLOSE_PAREN
 
   blocksWithin += 1
-  result &= SPACE & OPEN_BRKT & NEWLINE
+  result &= PSPACE & OPEN_BRKT & NEWLINE
 
   for item in jmthd.jbody:
     result &= constructionHelper(item, blocksWithin)
@@ -100,11 +100,11 @@ proc construct(cls:JavaClass, blocksWithin:var int):string =
   if cls.jfinal:
     result &= FINAL
 
-  result &= CLASS_DECL & cls.jname & SPACE
+  result &= CLASS_DECL & cls.jname
 
 
   if cls.jextends != "":
-    result &= EXTENDS_KW & cls.jextends & SPACE
+    result &= SPACE & EXTENDS_KW & cls.jextends
 
 
   if cls.jimplements.len != 0:
@@ -114,7 +114,8 @@ proc construct(cls:JavaClass, blocksWithin:var int):string =
     if cls.jimplements.len != 0:
       for implement in cls.jimplements:
         result &= COMMA & implement
-    result &= SPACE
+
+    result &= PSPACE
 
 
   result &= NINDENT & OPEN_BRKT & NEWLINE
