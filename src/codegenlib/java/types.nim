@@ -1,21 +1,13 @@
-import std/tables
+import std/[tables, strutils]
 
 type
-  JavaBaseType* = ref object of RootObj
+  JavaBase* = ref object of RootObj
+
+  JavaBaseType* = ref object of JavaBase
     jparent*:JavaBaseType
 
   JavaCodeEmission* = ref object of JavaBaseType
     jcode*:string # The raw Java code as a string, could be anything as long as it's valid
-
-  JavaWrapperObject* = ref object of JavaBaseType
-    jname*:string # The name of the Java object we're referencing
-
-  JavaMethodWrapper* = ref object of JavaWrapperObject
-    jarguments*:seq[OrderedTable[string, string]] # The arguments of the Java method, as a sequence of tables
-
-  JavaClassWrapper* = ref object of JavaWrapperObject
-    jmethods*:seq[JavaMethodWrapper] # Methods that a class owns
-    jclasses*:seq[JavaClassWrapper]  # For nested classes (that are public)
 
   JavaVariableDeclaration* = ref object of JavaBaseType
     jtyp*: string         # The type of the variable
@@ -53,6 +45,34 @@ type
     jclasses*: seq[JavaBaseType]       # Classes stored as a sequence to be built
     jimportStatements*: seq[string] # Just collects all package imports
 
+  UnconstructableTypeDefect* = object of Defect
+
+  UncastableDefect* = object of Defect
+
+
+proc tostring*(jce:JavaCodeEmission): string =
+  return jce.jcode
+
+
+type JavaBaseObject* = ref object of JavaBase
+
 
 type
-  UnconstructableTypeDefect* = object of Defect
+  JString* = ref object of JavaBaseObject
+    value*:string
+
+
+proc jstring*(str:string):JString = JString(value:str)
+
+
+proc tostring*(str:JString):string =
+  return str.value.escape()
+
+
+proc tostring*(jb:JavaBase):string =
+  if jb of JavaCodeEmission:
+    return tostring JavaCodeEmission(jb)
+  elif jb of JString:
+    return tostring JString(jb)
+  else:
+    raise UncastableDefect.newException("Can't cast JavaBase!")

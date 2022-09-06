@@ -1,4 +1,4 @@
-import std/[tables, sequtils]
+import std/[tables, sequtils, strutils]
 
 var globalNamespace* = "example"  # Can be overridden by the user
 
@@ -82,4 +82,24 @@ proc addSnippetToBlock*(jb: var JavaBlock, name:string, snippets:varargs[JavaBas
   jb.jsnippets.add toSeq(snippets)
 
 
-proc javacode*(code:string):JavaCodeEmission = JavaCodeEmission(jcode:code)
+proc javacode*(code:string, suffix:string=""):JavaCodeEmission = JavaCodeEmission(jcode:code&suffix)
+const jc* = javacode
+
+
+proc constructMethodCall*(qualifiedMethodName:string, args:varargs[JavaBase]):string =
+  result = qualifiedMethodName & "("
+
+  var strargs = args.map(tostring)
+  result &= strargs.join(", ")
+
+  result &=  ")"
+  # Don't terminate the line automatically because it may be used in a nested function call
+
+
+proc initialiseClass*(className:string, args:varargs[JavaBase]):string =
+  result = "new" & className & "("
+
+  var strargs = args.map(tostring)
+  result &= strargs.join(", ")
+
+  result &=  ")"

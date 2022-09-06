@@ -1,12 +1,13 @@
 import codegenlib/java
+import strutils, sequtils
 
 java.globalNamespace = "com.foc.codegen"
 
 var
   javafile:JavaFile = newJavaFile("example")
   javaclass:JavaClass = newJavaClass("CodeGen")
-  javavardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "myVar", "\"Wow\"", true, true, true)
-  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "\"This is just a placeholder!\"", true)
+  javavardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "myVar", "Wow".escape, true, true, true)
+  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "This is just a placeholder!".escape, true)
   javamethod:JavaMethodDeclaration = newJavaMethodDeclaration("main", "void", true, true)
   javablock:JavaBlock = newJavaBlock()
 
@@ -16,16 +17,22 @@ javafile.imports("java.lang.Object")
 
 javaclass.extends("Object")
 javaclass.addClassVariable(javavardecl)
-javaclass.addClassVariable(javacode "    public static final String emittedVar = \"DON'T DO MANUAL CODE EMISSION UNLESS NEEDED!\";\n")
+javaclass.addClassVariable("public static final String emittedVar = \"DON'T DO MANUAL CODE EMISSION UNLESS NEEDED!\"".jc(suffix=";\n"))
 
 javamethod.addMethodArgument "String", "example"
 
 javamethod.addSnippetToMethodBody newvardecl
 
-javamethod.addSnippetToMethodBody "\nSystem.out.println(CodeGen.myVar);\n".javacode
-javamethod.addSnippetToMethodBody "System.out.println(CodeGen.emittedVar);\n".javacode
-javamethod.addSnippetToMethodBody "System.out.println(\"AUTOMATED JAVA CODE WRAPPING *WILL* BE DONE AT SOME POINT\");\n".javacode
-javamethod.addSnippetToMethodBody "System.out.println(methodVar);".javacode
+template SystemOutPrintln(args:varargs[JavaBase]):JavaCodeEmission =
+  constructMethodCall("System.out.println", args).javacode(suffix=";")
+
+
+javamethod.addSnippetToMethodBody(
+  SystemOutPrintln "CodeGen.myVar".jc,
+  SystemOutPrintln "CodeGen.emittedVar".jc,
+  SystemOutPrintln "AUTOMATED JAVA CODE WRAPPING *WILL* BE DONE AT SOME POINT".jstring,
+  SystemOutPrintln "methodVar".jc
+)
 
 
 javablock.addSnippetToBlock(
