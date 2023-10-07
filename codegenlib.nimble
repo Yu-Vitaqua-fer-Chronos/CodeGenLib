@@ -1,12 +1,12 @@
 # Package
 
-version       = "1.1.11"
-author        = "Mythical Forest Collective"
-description   = "A simple code generation library for other programming languages!"
+version       = "2.0.0"
+author        = "Yu Vitaqua fer Chronos"
+description   = "A simple code generation library for other programming languages."
 license       = "MIT"
 srcDir        = "src"
 
 
 # Dependencies
 
-requires "nim >= 1.6.0"
+requires "nim >= 2.0.0" # May work on older versions, not willing to test.

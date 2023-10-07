@@ -1,71 +1,76 @@
-import std/[strutils, tables]
+import std/[
+  strutils,
+  options,
+  tables,
+  sugar
+]
 
 import ./keywords
 import ./types
 
+const
+  INDENT = "    "
+  SPACE = " "
+  NEWLINE = "\n"
 
-when defined(minimised):
-  const NINDENT = ""
-else:
-  template NINDENT():string = (repeat(INDENT, blocksWithin))
+proc construct*(jobj: JavaBaseType, blocksWithin: var int): string  # Forward declaration
 
-
-proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string  # Forward declaration
-
-
-proc construct(jcemission:JavaCodeEmission, blocksWithin:var int):string =
-  result &= NINDENT & jcemission.jcode & NEWLINE # Won't work well for *all* code but, would be nice for prettifying
+proc construct(jcemission: JavaCodeEmission, blocksWithin: var int): string =
+  # Won't work well for *all* code but, would be nice for prettifying
+  result &= repeat(INDENT, blocksWithin) & jcemission.jcode
 
 
-proc construct(variable:JavaVariableDeclaration, blocksWithin:var int):string =
-  result &= NINDENT
+proc construct(variable: JavaVariableDeclaration, blocksWithin: var int): string =
+  result &= repeat(INDENT, blocksWithin)
 
-  if variable.jparent of JavaMethodDeclaration:
-    discard
+  if variable.jparent.isSome:
+    if variable.jparent.get() of JavaMethodDeclaration:
+      discard
 
-  elif variable.jparent of JavaBlock:
-    discard
+    elif variable.jparent.get() of JavaBlock:
+      discard
 
-  else:
-    if variable.jpublic:
-      result &= PUBLIC
     else:
-      result &= PRIVATE
+      if variable.jpublic:
+        result &= PUBLIC & SPACE
+      else:
+        result &= PRIVATE & SPACE
 
-    if variable.jstatik:
-      result &= STATIC
+      if variable.jstatic:
+        result &= STATIC & SPACE
 
 
   if variable.jfinal:
-    result &= FINAL
+    result &= FINAL & SPACE
 
   if variable.jtyp != "":
     result &= variable.jtyp & SPACE
 
   result &= variable.jname
 
-  if variable.jstatik and variable.jvalue == "":
-    echo "WARNING: The class `" & JavaClass(variable.jparent).jname & "` is static but with no value! This will error in javac!"
+  if variable.jstatic and variable.jvalue == "":
+    echo "WARNING: The class variable `" & variable.jname &
+      "` is static but with no value! This will error in javac!"
 
   if variable.jvalue != "":
     result &= EQUALS & variable.jvalue
 
-  result &= LINE_SEP
+  result &= SEMICOLON
 
 
-proc construct(jmthd:JavaMethodDeclaration, blocksWithin:var int): string =
-  result &= NEWLINE & NINDENT
+proc construct(jmthd: JavaMethodDeclaration, blocksWithin: var int): string =
+  result &= repeat(INDENT, blocksWithin)
 
   if jmthd.jpublic:
-    result &= PUBLIC
+    result &= PUBLIC & SPACE
   else:
-    result &= PRIVATE
+    result &= PRIVATE & SPACE
 
-  if jmthd.jstatik:
-    result &= STATIC
+  if jmthd.jstatic:
+    result &= STATIC & SPACE
 
   if jmthd.jfinal:
-    result &= FINAL
+    result &= FINAL & SPACE
 
   result &= jmthd.jreturnTyp & SPACE
 
@@ -82,71 +87,76 @@ proc construct(jmthd:JavaMethodDeclaration, blocksWithin:var int): string =
   result &= CLOSE_PAREN
 
   blocksWithin += 1
-  result &= PSPACE & OPEN_BRKT & NEWLINE
+  result &= SPACE & OPEN_BRKT & NEWLINE
 
-  for item in jmthd.jbody:
-    result &= constructionHelper(item, blocksWithin)
+  let snippets = collect(newSeq):
+    for snippet in jmthd.jbody:
+      construct(snippet, blocksWithin)
+
+  result &= snippets.join(NEWLINE)
 
   blocksWithin -= 1
-  result &= NEWLINE & NINDENT & CLOSE_BRKT
+  result &= NEWLINE & repeat(INDENT, blocksWithin) & CLOSE_BRKT
 
 
-proc construct(cls:JavaClass, blocksWithin:var int):string =
+proc construct(cls: JavaClass, blocksWithin: var int): string =
+  result &= NEWLINE & repeat(INDENT, blocksWithin)
+
   if cls.jpublic:
-    result &= PUBLIC
+    result &= PUBLIC & SPACE
   else:
-    result &= PRIVATE
+    result &= PRIVATE & SPACE
+
+  if cls.jstatic:
+    result &= STATIC & SPACE
 
   if cls.jfinal:
-    result &= FINAL
+    result &= FINAL & SPACE
 
-  result &= CLASS_DECL & cls.jname
-
+  result &= CLASS_DECL & SPACE & cls.jname
 
   if cls.jextends != "":
-    result &= SPACE & EXTENDS_KW & cls.jextends
-
+    result &= SPACE & EXTENDS_KW & SPACE & cls.jextends
 
   if cls.jimplements.len != 0:
-    result &= IMPLEMENTS_KW & cls.jimplements[0]
-    cls.jimplements.del(0)
+    result &= SPACE & IMPLEMENTS_KW & SPACE & cls.jimplements.join(COMMA)
 
-    if cls.jimplements.len != 0:
-      for implement in cls.jimplements:
-        result &= COMMA & implement
-
-    result &= PSPACE
-
-
-  result &= NINDENT & OPEN_BRKT & NEWLINE
+  result &= SPACE & OPEN_BRKT & NEWLINE
   blocksWithin += 1
 
-  for classvar in cls.jclassvars:
-    result &= classvar.constructionHelper(blocksWithin)
+  let vsnippets = collect(newSeq):
+    for snippet in cls.jclassvars:
+      construct(snippet, blocksWithin)
 
-  for jmethod in cls.jclassmethods:
-    result &= jmethod.constructionHelper(blocksWithin)
+  result &= vsnippets.join(NEWLINE)
 
-  result &= NINDENT & NEWLINE & CLOSE_BRKT
+  if (cls.jclassmethods.len != 0) and (cls.jclassvars.len != 0):
+    result &= NEWLINE
+
+  let jsnippets = collect(newSeq):
+    for snippet in cls.jclassmethods:
+      construct(snippet, blocksWithin)
+
+  result &= jsnippets.join(NEWLINE)
+
+  result &= repeat(INDENT, blocksWithin) & NEWLINE & CLOSE_BRKT
   blocksWithin -= 1
 
 
-proc construct(jf:JavaFile, blocksWithin:var int):string =
-  result &= PKG_STMT & jf.jnamespace
+proc construct(jf: JavaFile, blocksWithin: var int): string =
+  result &= PKG_STMT & SPACE & jf.jnamespace
 
   if jf.jsubpackage != "":
     result &= DOT & jf.jsubpackage
 
-  result &= LINE_SEP & NEWLINE
+  result &= SEMICOLON & repeat(NEWLINE, 2)
 
 
   for imprt in jf.jimportStatements:
-    result &= IMPORT_STMT & imprt & LINE_SEP
-  result &= NEWLINE
-
+    result &= IMPORT_STMT & SPACE & imprt & SEMICOLON & NEWLINE
 
   for clss in jf.jclasses:
-    result &= clss.constructionHelper(blocksWithin)
+    result &= clss.construct(blocksWithin)
 
   if blocksWithin != 0:
     echo "WARNING: The `blocksWithin` variable used internally to keep track of brackets, is not 0!"
@@ -156,29 +166,30 @@ proc construct(jf:JavaFile, blocksWithin:var int):string =
       echo "The faulty package is: " & jf.jnamespace
 
 
-proc construct(jb:JavaBlock, blocksWithin:var int):string =
-  result &= NEWLINE & NINDENT
+proc construct(jb: JavaBlock, blocksWithin: var int): string =
+  result &= repeat(INDENT, blocksWithin)
 
   for i in 0..min(jb.jnames.high, jb.jsnippets.high):
     if i != 0:
-      result &= PSPACE
+      result &= SPACE
 
     blocksWithin += 1
-    result &= jb.jnames[i] & PSPACE & OPEN_BRKT & NEWLINE
+    result &= jb.jnames[i] & SPACE & OPEN_BRKT & NEWLINE
 
-    for snippet in jb.jsnippets[i]:
-      result &= snippet.constructionHelper(blocksWithin)
+    let snippets = collect(newSeq):
+      for snippet in jb.jsnippets[i]:
+        construct(snippet, blocksWithin)
+
+    result &= snippets.join(NEWLINE)
 
     blocksWithin -= 1
-    result &= NEWLINE & NINDENT & CLOSE_BRKT
+    result &= NEWLINE & repeat(INDENT, blocksWithin) & CLOSE_BRKT
 
     if i != 0:
-      result &= PSPACE
-
-  result &= NEWLINE
+      result &= SPACE
 
 
-proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string =
+proc construct*(jobj: JavaBaseType, blocksWithin: var int): string =
   if jobj of JavaFile:
     result &= JavaFile(jobj).construct(blocksWithin)
 
@@ -198,11 +209,14 @@ proc constructionHelper(jobj:JavaBaseType, blocksWithin:var int):string =
     result &= JavaCodeEmission(jobj).construct(blocksWithin)
 
   else:
-    raise newException(UnconstructableTypeDefect, "We can't build this object! Has the construction method been implemented in `fileconstruction.constructionHelper`?")
+    raise newException(UnconstructableTypeDefect, "We can't build this object! Please provide an accessible implementation!")
 
-proc `$`*(javafile: JavaFile): string =
-  # Will be used to keep track of brackets, should always
-  # be 0 at the end, if not, something went wrong!
-  var blocksWithin = 0
+proc construct*[T: JavaBaseType](jobj: T, blocksWithin: var int = 0): string =
+  var nestedBlocks = blocksWithin
 
-  return javafile.constructionHelper(blocksWithin)
+  jobj.construct(nestedBlocks)
+
+proc construct*[T: JavaBaseType](jobj: T, blocksWithin: int = 0): string =
+  var nestedBlocks = blocksWithin
+
+  jobj.construct(nestedBlocks)

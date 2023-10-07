@@ -1,30 +1,34 @@
-import codegenlib/java
-import strutils, sequtils
+import std/[
+  strutils
+]
 
-java.globalNamespace = "com.foc.codegen"
+import codegenlib/java
+
+java.globalNamespace = "io.github.yu_vitaqua_fer_chronos.codegen"
 
 var
-  javafile:JavaFile = newJavaFile("example")
-  javaclass:JavaClass = newJavaClass("CodeGen")
-  javavardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "myVar", "Wow".escape, true, true, true)
-  newvardecl:JavaVariableDeclaration = newJavaVariableDeclaration("String", "methodVar", "This is just a placeholder!".escape, true)
-  javamethod:JavaMethodDeclaration = newJavaMethodDeclaration("main", "void", true, true)
-  javablock:JavaBlock = newJavaBlock()
+  javafile = newJavaFile("example")
+  javaclass = newJavaClass("CodeGen")
+  javavardecl = newJavaVariableDeclaration("String", "myVar", "Wow".escape, true, true, true)
+  newvardecl = newJavaVariableDeclaration("String", "methodVar", "This is just a placeholder!".escape, true)
+  javamethod = newJavaMethodDeclaration("main", "void", true, true)
+  javablock = newJavaBlock()
 
 # Don't strictly *need* to import a class, but lets you do `Object`
-# instead of `java.lang.Object`
+# instead of `java.lang.Object` (doesn't apply to classes in `java.lang`, example.)
 javafile.imports("java.lang.Object")
+javafile.imports("java.lang.String")
 
 javaclass.extends("Object")
 javaclass.addClassVariable(javavardecl)
 javaclass.addClassVariable("public static final String emittedVar = \"DON'T DO MANUAL CODE EMISSION UNLESS NEEDED!\"".jc(suffix=";\n"))
 
-javamethod.addMethodArgument "String", "example"
+javamethod.addMethodArgument "String[]", "example"
 
 javamethod.addSnippetToMethodBody newvardecl
 
 template SystemOutPrintln(args:varargs[JavaBase]):JavaCodeEmission =
-  constructMethodCall("System.out.println", args).javacode(suffix=";")
+  constructMethodCall("System.out.println", args).jc(suffix=";")
 
 
 javamethod.addSnippetToMethodBody(
@@ -37,12 +41,12 @@ javamethod.addSnippetToMethodBody(
 
 javablock.addSnippetToBlock(
   "if (CodeGen.myVar == \"Wow\")",
-  "System.out.println(\"`myVar` = \\\"Wow\\\"\");".javacode
+  "System.out.println(\"`myVar` = \\\"Wow\\\"\");".jc
 )
 
 javablock.addSnippetToBlock(
   "else",
-  "System.out.println(\"`myVar` is different from normal!\");".javacode
+  "System.out.println(\"`myVar` is different from normal!\");".jc
 )
 
 javamethod.addSnippetToMethodBody javablock
@@ -51,4 +55,4 @@ javaclass.addClassMethod(javamethod)
 
 javafile.addJavaClass(javaclass)
 
-echo $javafile
+echo javafile.construct(0)
