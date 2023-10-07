@@ -8,11 +8,6 @@ import std/[
 import ./keywords
 import ./types
 
-const
-  INDENT = "    "
-  SPACE = " "
-  NEWLINE = "\n"
-
 proc construct*(jobj: JavaBaseType, blocksWithin: var int): string  # Forward declaration
 
 proc construct(jcemission: JavaCodeEmission, blocksWithin: var int): string =

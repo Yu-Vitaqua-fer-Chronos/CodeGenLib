@@ -8,7 +8,7 @@ import std/[
 var globalNamespace* = "example"  # Can be overridden by the user
 
 import java/[keywords, types, class, fileconstruction]
-export java.keywords, java.types, java.class, java.fileconstruction
+export types, class, fileconstruction
 
 
 proc newJavaFile*(subpackage: string = "", namespace: string = ""): JavaFile =
@@ -118,7 +118,7 @@ proc initialiseClass*(className: string, args: varargs[JavaBase]): string =
   runnableExamples:
     echo initialiseClass("String", "Woah!".jstring)
 
-  result = "new " & className & "("
+  result = NEW & SPACE & className & "("
 
   var strargs = args.map(construct)
   result &= strargs.join(", ")

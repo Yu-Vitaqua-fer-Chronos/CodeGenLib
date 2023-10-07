@@ -1,3 +1,9 @@
+# Various whitespace
+const
+  INDENT* = "    "
+  SPACE* = " "
+  NEWLINE* = "\n"
+
 # Keywords
 const
   SEMICOLON* = ";"
@@ -6,6 +12,7 @@ const
   CLOSE_BRKT* = "}"
   OPEN_PAREN* = "("
   CLOSE_PAREN* = ")"
+  NEW* = "new"
   PUBLIC* = "public"
   PRIVATE* = "private"
   STATIC* = "static"
